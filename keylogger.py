@@ -154,9 +154,11 @@ def get_Periodic_SS():
         es.shareViaMail(filename, filename, "bongspatra@gmail.com", True)
         
         # upload the screenshot to mysql database - screenshot table
-        # uploadScreenshot.uploadSS(filename)
+        print("Uploading screenshot to MySQL Database")
+        uploadScreenshot.uploadSS(filename)
         
         # delete the screenshot file after uploading ann sending
+        print("Removing image file - " + filename + " - already uploaded")
         try:
             os.remove(filename)
         except OSError as e:
@@ -253,5 +255,4 @@ except KeyboardInterrupt:
     print("Program interrupted and exiting.")
 
 # ---------------------------------------------------------------------------------------------------------
-
 
