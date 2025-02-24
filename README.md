@@ -15,8 +15,8 @@ This project is strictly for educational and ethical purposes. Unauthorized usag
 ✅ Clipboard Monitoring: Detects Ctrl + C presses and stores copied data in a file.
 ✅ Data Encryption: Encrypts all text-based files to enhance security.
 ✅ Database Storage:
-Stores system info, screenshots, and audio in MySQL database.
-Saves video recordings, log files, and clipboard data in Firebase.
+    Stores system info, screenshots, and audio in MySQL database.
+    Saves video recordings, log files, and clipboard data in Firebase.
 ✅ Email Sharing: Automatically sends all collected data to an admin email at specified time intervals.
 
 🛠️ Requirements
