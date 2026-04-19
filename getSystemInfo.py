@@ -38,36 +38,45 @@ def get_System_Information():
         current_directory = os.getcwd()
         user_environment = os.environ
         
-        info_str = (
-            "System Information:\n"
-            f"Hostname : {hostname}\n"
-            f"Internal IP: {internalIP}\n"
-            f"External IP: {externalIP}\n"
-            f"Processor : {processor}\n"
-            f"OS: {operatingSystem}\n"
-            f"OS Version: {OSversion}\n"
-            f"Machine Name: {machine}\n"
-            f"CPU Count: {cpu_count}\n"
-            f"CPU Frequency: {cpu_freq.current} MHz\n"
-            f"CPU Usage: {cpu_usage}%\n"
-            f"Total Memory: {virtual_memory.total / (1024 ** 3):.2f} GB\n"
-            f"Available Memory: {virtual_memory.available / (1024 ** 3):.2f} GB\n"
-            f"Used Memory: {virtual_memory.used / (1024 ** 3):.2f} GB\n"
-            f"Memory Usage: {virtual_memory.percent}%\n"
-            f"Total Disk Space: {disk_usage.total / (1024 ** 3):.2f} GB\n"
-            f"Used Disk Space: {disk_usage.used / (1024 ** 3):.2f} GB\n"
-            f"Free Disk Space: {disk_usage.free / (1024 ** 3):.2f} GB\n"
-            f"Disk Usage: {disk_usage.percent}%\n"
-            f"Boot Time: {boot_time}\n"
-            f"Current Directory: {current_directory}\n"
-        )
+        details = {
+            "Hostname": hostname,
+            "Internal IP": internalIP,
+            "External IP": externalIP,
+            "Processor": processor,
+            "OS": operatingSystem,
+            "OS Version": OSversion,
+            "Machine Name": machine,
+            "CPU Count": cpu_count,
+            "CPU Frequency": f"{cpu_freq.current} MHz",
+            "CPU Usage": f"{cpu_usage}%",
+            "Total Memory": f"{virtual_memory.total / (1024 ** 3):.2f} GB",
+            "Available Memory": f"{virtual_memory.available / (1024 ** 3):.2f} GB",
+            "Used Memory": f"{virtual_memory.used / (1024 ** 3):.2f} GB",
+            "Memory Usage": f"{virtual_memory.percent}%",
+            "Total Disk Space": f"{disk_usage.total / (1024 ** 3):.2f} GB",
+            "Used Disk Space": f"{disk_usage.used / (1024 ** 3):.2f} GB",
+            "Free Disk Space": f"{disk_usage.free / (1024 ** 3):.2f} GB",
+            "Disk Usage": f"{disk_usage.percent}%",
+            "Boot Time": boot_time,
+            "Current Directory": current_directory
+        }
         
-        for key, value in user_environment.items():
+        info_str = ''
+        for key, value in details.items():
             info_str += f"{key}: {value}\n"
+            
+        info_str1 = ''
+        for key, value in user_environment.items():
+            info_str1 += f"{key}: {value}\n"
         
         # write all details to a file
-        with open('systemInfo.txt', 'w') as f:           
+        with open('systemInfo.txt', 'w') as f:   
+            f.write("System Information:\n\n")        
             f.write(info_str)
+            f.write("\nEnvironment Path Variables and Other Details:\n\n")
+            f.write(info_str1)
+            
+        return details
             
             
 # get_System_Information()

